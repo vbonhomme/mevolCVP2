@@ -19,7 +19,13 @@ knitr::opts_chunk$set(
 [![R-CMD-check](https://github.com/vbonhomme/mevolCVP2/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/vbonhomme/mevolCVP2/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-The goal of mevolCVP2 is to ...
+The goal of mevolCVP2 is to provide both a general approach and helpers to parameterize Linear Discriminant Analyses. It generalizes the seminal idea [first published](https://www.sciencedirect.com/science/article/abs/pii/S030544031200355X) in 2013 by Allowen Evin and colleagues in _Journal of Archaeological Science_, and follows a pre-package version by [Evin and Bonhomme](https://github.com/vbonhomme/mevolCVP).
+
+This approach was initially used for morphometrical analyses but may reveal useful in other fields. For morphometrics, a massive user of Linear Discriminant Analyses.
+
+Yet this approach deeply changed the way we see, parameterize and do LDAs in morphometrics, it boils down, programmatically, to very few helpers that we propose here.
+
+The vignette presents more extensively the package architecture as well as ways to flavour it upon your own needs.
 
 ## Installation
 
@@ -38,19 +44,3 @@ This is a basic example which shows you how to solve a common problem:
 library(mevolCVP2)
 ## basic example code
 ```
-
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
