@@ -1,4 +1,4 @@
 url: https://vbonhomme.github.io/mevolCVP2/
 template:
   bootstrap: 5
-
+  bootswatch: simplex
