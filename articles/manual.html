@@ -73,7 +73,7 @@ Archaeological Science</em> in 2013.</p>
 2013), then wrapped into a <a href="https://github.com/vbonhomme/mevolCVP" class="external-link">package</a> (circa 2018)
 without any change to the code and not released on CRAN. Here, we
 rethink and rewrote the latter code to have something easier to build
-upon and to tweak.</p>
+upon.</p>
 <p>The Evin et al. (2013) paper, among others, used “predictive”
 discriminant analyses in morphometrical analyses, particularly in the
 context of landmark-based morphometrics which uses principal component
@@ -157,7 +157,8 @@ factor (eg a factor or character) 2) at least one other column being a
 <em>JAS</em> paper. Let’s have a look to the first and last 5 rows and
 the first 3 columns:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pig</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">166</span><span class="op">:</span><span class="fl">171</span><span class="op">)</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">pig</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">166</span><span class="op">:</span><span class="fl">171</span><span class="op">)</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span>
+<span><span class="va">x</span></span>
 <span><span class="co">#&gt;     sp           PC1           PC2           PC3          PC4           PC5</span></span>
 <span><span class="co">#&gt; 1   WB -2.467725e-02  0.0072224577 -0.0001790668  0.011881194 -0.0009818745</span></span>
 <span><span class="co">#&gt; 2   WB -8.637212e-03  0.0239918850 -0.0002652039  0.009237132 -0.0142818922</span></span>
@@ -170,7 +171,40 @@ the first 3 columns:</p>
 <span><span class="co">#&gt; 169 DP -4.201241e-02  0.0012598814 -0.0075265494  0.009958453  0.0016966005</span></span>
 <span><span class="co">#&gt; 170 DP -1.209965e-02  0.0037795891 -0.0015912658  0.002923668  0.0091559514</span></span>
 <span><span class="co">#&gt; 171 DP -5.043986e-02 -0.0003020287  0.0055480180 -0.002182170 -0.0121354100</span></span></code></pre></div>
-<p>head(pig) tail(pig) table(pig$sp) ```</p>
+<p>Then three core helpers ease the common operations:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/randomize.html">randomize</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>  <span class="co"># look at the first column</span></span>
+<span><span class="co">#&gt;     sp           PC1           PC2           PC3          PC4           PC5</span></span>
+<span><span class="co">#&gt; 1   DP -2.467725e-02  0.0072224577 -0.0001790668  0.011881194 -0.0009818745</span></span>
+<span><span class="co">#&gt; 2   WB -8.637212e-03  0.0239918850 -0.0002652039  0.009237132 -0.0142818922</span></span>
+<span><span class="co">#&gt; 3   DP  2.540836e-02 -0.0001676755  0.0100646985  0.001353267 -0.0065766928</span></span>
+<span><span class="co">#&gt; 4   DP -4.381549e-02 -0.0029845435 -0.0009553462  0.009690195  0.0186499046</span></span>
+<span><span class="co">#&gt; 5   DP  1.368996e-02  0.0048695525  0.0176407878 -0.003924953 -0.0116175659</span></span>
+<span><span class="co">#&gt; 166 WB -2.868456e-02 -0.0630233879 -0.0148804598  0.001632507 -0.0029347196</span></span>
+<span><span class="co">#&gt; 167 WB -7.910084e-02 -0.0079671135  0.0072650895  0.007142158 -0.0086475770</span></span>
+<span><span class="co">#&gt; 168 DP  2.387963e-05  0.0106218186  0.0096436493 -0.001926465  0.0067834675</span></span>
+<span><span class="co">#&gt; 169 DP -4.201241e-02  0.0012598814 -0.0075265494  0.009958453  0.0016966005</span></span>
+<span><span class="co">#&gt; 170 WB -1.209965e-02  0.0037795891 -0.0015912658  0.002923668  0.0091559514</span></span>
+<span><span class="co">#&gt; 171 WB -5.043986e-02 -0.0003020287  0.0055480180 -0.002182170 -0.0121354100</span></span>
+<span><span class="fu"><a href="../reference/balance.html">balance</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">2</span><span class="op">)</span> <span class="co"># count rows in each group</span></span>
+<span><span class="co">#&gt;     sp         PC1           PC2          PC3         PC4          PC5</span></span>
+<span><span class="co">#&gt; 170 DP -0.01209965  0.0037795891 -0.001591266 0.002923668  0.009155951</span></span>
+<span><span class="co">#&gt; 167 DP -0.07910084 -0.0079671135  0.007265090 0.007142158 -0.008647577</span></span>
+<span><span class="co">#&gt; 3   WB  0.02540836 -0.0001676755  0.010064699 0.001353267 -0.006576693</span></span>
+<span><span class="co">#&gt; 3.1 WB  0.02540836 -0.0001676755  0.010064699 0.001353267 -0.006576693</span></span>
+<span><span class="fu"><a href="../reference/retain.html">retain</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">3</span><span class="op">)</span>  <span class="co"># count quantitative variables columns</span></span>
+<span><span class="co">#&gt;     sp           PC1           PC2           PC3</span></span>
+<span><span class="co">#&gt; 1   WB -2.467725e-02  0.0072224577 -0.0001790668</span></span>
+<span><span class="co">#&gt; 2   WB -8.637212e-03  0.0239918850 -0.0002652039</span></span>
+<span><span class="co">#&gt; 3   WB  2.540836e-02 -0.0001676755  0.0100646985</span></span>
+<span><span class="co">#&gt; 4   WB -4.381549e-02 -0.0029845435 -0.0009553462</span></span>
+<span><span class="co">#&gt; 5   WB  1.368996e-02  0.0048695525  0.0176407878</span></span>
+<span><span class="co">#&gt; 166 DP -2.868456e-02 -0.0630233879 -0.0148804598</span></span>
+<span><span class="co">#&gt; 167 DP -7.910084e-02 -0.0079671135  0.0072650895</span></span>
+<span><span class="co">#&gt; 168 DP  2.387963e-05  0.0106218186  0.0096436493</span></span>
+<span><span class="co">#&gt; 169 DP -4.201241e-02  0.0012598814 -0.0075265494</span></span>
+<span><span class="co">#&gt; 170 DP -1.209965e-02  0.0037795891 -0.0015912658</span></span>
+<span><span class="co">#&gt; 171 DP -5.043986e-02 -0.0003020287  0.0055480180</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
