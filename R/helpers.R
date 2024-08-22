@@ -90,7 +90,7 @@ lda1 <- function(x){
 #' @examples
 #' x <- iris %>% lda1
 #' x %>% acc()
-#' x %>% acc_class()
+#' x %>% acc_classes()
 #' x %>% acc_all()
 #
 #' @export
