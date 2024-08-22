@@ -1,8 +1,9 @@
 pandoc: 3.1.11
 pkgdown: 2.1.0
 pkgdown_sha: ~
-articles: {}
-last_built: 2024-08-22T15:17Z
+articles:
+  manual: manual.html
+last_built: 2024-08-22T17:34Z
 urls:
   reference: https://vbonhomme.github.io/mevolCVP2/reference
   article: https://vbonhomme.github.io/mevolCVP2/articles
