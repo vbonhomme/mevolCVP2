@@ -53,23 +53,96 @@ Here, all analyses will start with a `data.frame` with:
 1) the first column being the grouping structure that can be turned into a factor (eg a factor or character)
 2) at least one other column being a (or many more) quantitative variable.
 
-We first load the package using `library`:
+We first load the package using `library`. We also specify a random seed which is a good idea to have the best of both worlds: randomness _and_ replicability across your sessions.
 ```{r}
 library(mevolCVP2)
+set.seed(2329)
 ```
 
 We will use the built-in `pig` dataset, borrowed from the _JAS_ paper. Let's have a look to the first and last 5 rows and the first 3 columns:
 ```{r pig-pres}
-x <- pig[c(1:5, 166:171), 1:6]
-x
+minipig <- pig[c(1:5, 166:171), 1:6]
+minipig
 ```
 
 Then three core helpers ease the common operations:
 
 ```{r core-helpers}
-randomize(x)  # look at the first column
-balance(x, 2) # count rows in each group
-retain(x, 3)  # count quantitative variables columns
+randomize(minipig)  # look at the first column
+balance(minipig, 2) # count rows in each group
+retain(minipig, 3)  # count quantitative variables columns
 ```
 
+The workhorse of this package is a thin wrapper on top of `MASS::lda` that directly returns the confusion matrix. `MASS::lda` is passed with `CV=TRUE` which returns leave-one-out cross-validated predictions, digested into a confusion matrix. Let's try it on the full `pig` dataset:
+
+```{r lda1}
+cm <- lda1(pig)
+```
+
+We can calculate accuracy indices on this confusion matrix. We will later see how to obtain additional metrics from the latter.
+
+```{r metrics}
+acc(cm)
+acc_classes(cm)
+acc_all(cm)
+```
+
+`pig` is "highly" unbalanced in terms of sample sizes between the two groups. We expect a naive LDA on this dataset to be biased and an LDA on balanced dataset to be more realistic in terms of class accuracies.
+
+```{r}
+pig %>% lda1() %>% acc_classes()
+pig %>% balance() %>% lda1() %>% acc_classes()
+```
+
+Above, we realize that the class accuracy of the `WB` group (larger by more than a factor 3) is drastically reduced and actually performs less well than `DP`.
+
+Whether these values are better than pure random have to be properly tested. We expect, in such binary case, something around 50/50 for pure random (ie a binomial) but we can be away from this ideal case that hypothesize a gentle structure of variables used by the LDA (which is not the case).
+
+```{r}
+pig %>% balance() %>% randomize() %>% lda1() %>% acc_classes()
+```
+
+We already have pretty much everything we need!
+
+One more helpful helper is `partition` that eases what we have done just before and returns a list with four different datasets with self-explanatory names:
+
+```{r}
+pigs1 <- partition(pig)
+pigs1
+```
+
+Now, we gonna take profit of functionnal programming tools provided by [purrr](https://purrr.tidyverse.org/). If you are not familiar with this package, stop everything and go have a look to it.
+
+```{r}
+library(purrr)
+pigs1 %>% map(\(.df1) .df1 %>% lda1() %>% acc_all())
+```
+
+The results above should replicate the expectations and results we observed before, doing it "by hand". 
+
+We can arrange them a bit and put them in a nice tibble. We just add a couple more tidying functions to the call:
+
+```{r}
+library(dplyr)
+pigs1 %>% map(\(.df1) .df1 %>% lda1() %>% acc_all()) %>% 
+  do.call("rbind", .) %>% as_tibble(rownames = "partition")
+```
+Can you see where we're going here? So let fun begins and we will replicate the four LDAs done just before using one more layer of `map_dfr` which is just a `map` that returns its results into a "rbinded" `data.frame`. Let's try with 10 iterations.
+
+
+```{r}
+K=10
+do1 <- function() {pigs1 %>% map(\(.df1) .df1 %>% lda1() %>% acc_all()) %>% 
+  do.call("rbind", .) %>% as_tibble(rownames = "partition")}
+pigs10 <- map_dfr(1:10, \(i) do1())
+pigs10
+```
+
+Let's digest this a bit with `dplyr`
+```{r}
+pigs10 %>% 
+  group_by(partition) %>% 
+  summarize(across(everything(), median))
+
+```
 

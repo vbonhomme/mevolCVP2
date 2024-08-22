@@ -22,5 +22,8 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 Imports: 
+    dplyr,
     magrittr,
-    MASS
+    MASS,
+    purrr,
+    tibble

@@ -111,19 +111,35 @@ acc_all <- function(x){
 }
 
 # # cross-validation ----
-# #    - original: the dataset passed, untouched
-# #    - random:   original but shuffled on first (ie grouping) column
-# #    - balanced: original but balanced on first column
-# #    - balanced_random: balanced but randomized on first column
-#
-# partition_names <- c("original", "random", "balanced", "balanced_random")
-# partition <- function(x){
-#   list(original=x,
-#        random=x %>% randomize(),
-#        balanced=x %>% balance(),
-#        balanced_random=x %>% balance() %>% randomize()
-#   )
-# }
+
+#' Obtain different flavours of a dataset
+#'
+#' This returns a list with four variations of a data.set:
+#'
+#' * original: the dataset passed, untouched
+#' * random:   original but shuffled on first (ie grouping) column
+#' * balanced: original but balanced on first column
+#' * balanced_random: balanced but randomized on first column
+#'
+#' @param x data.frame
+#' @param n passed to [balance()] (the smallest sample size by default)
+#'
+#' @return a named list described above
+#'
+#' @examples
+#' pig %>% partition()
+
+#' @export
+partition <- function(x, n=min(table(x[[1]]))){
+  list(original=x,
+       random=x %>% randomize(),
+       balanced=x %>% balance(n),
+       balanced_random=x %>% balance(n) %>% randomize()
+  )
+}
+
+.partition_names <- c("original", "random", "balanced", "balanced_random")
+
 #
 # # hooks ----
 # hook_bypass <- function(x) x
