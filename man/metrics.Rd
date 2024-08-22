@@ -24,6 +24,6 @@ Only accuracy (global and by class) so far but more may come.
 \examples{
 x <- iris \%>\% lda1
 x \%>\% acc()
-x \%>\% acc_class()
+x \%>\% acc_classes()
 x \%>\% acc_all()
 }
