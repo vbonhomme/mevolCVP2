@@ -1,5 +1,5 @@
 ---
-title: "manual"
+title: "How to use (and build on) mevolCVP2"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{manual}
@@ -14,7 +14,58 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+# Preamble
+
+This tiny package (finally) releases the [seminal idea coined](https://www.sciencedirect.com/science/article/abs/pii/S030544031200355X) by Allowen Evin and colleagues in _Journal of Archaeological Science_ in 2013.
+
+This approach was previously available as a single script (circa 2013), then wrapped into a [package](https://github.com/vbonhomme/mevolCVP) (circa 2018) without any change to the code and not released on CRAN.
+
+The Evin et al. (2013) paper, among others, used "predictive" discriminant analyses in morphometrical analyses, particularly in the context of landmark-based morphometrics which uses principal component analyses prior to LDA.
+
+The idea was two-fold: i) parameterized the optimal number of principal components to retain for further linear discriminant analyses, and ii) evaluated the effects of unbalanced sample sized between groups for LDA.
+
+Yet this approach deeply changed the way we see, parameterize and do LDAs in morphometrics, it actualy boils down, statistically, to the following two core ideas.
+
+# Rationale
+
+The rational of permutationnal and parameterized discriminant analyses boils down to two ideas:
+
+1) **The number of variables is discriminant analyses matters** and can be optimized.
+
+This is typically the case for landmark approaches where a "preliminary" PCA mandatory and its components later used for LDA. But even for outline-based approaches, where quantitative variables are not orthogonal and independant by construction, their number also matters.
+
+In other words, the common view that a linear discriminant analysis accuracy increases monotonously with the number of variables you feed it with is wrong. 
+
+Of course, we let apart here many other fundamental aspects such as measurement error, it is neither reasonable nor meaningful (nor even allowed) to use 200 principal components or 60 harmonics to train models that will ultimately be used on degraded archaeological material (or even fresh)
+
+2) **The group sample sizes matters**. In spite of prior used by default in LDA (eg in `MASS::lda`), the class proportions is not enough to unbias class predictions and consequently global accuracy. In other words, if you have a dataset with 90% of class A and 10% of class B, you will "mechanically" have a better cross-validation accuracy for class A and likely an optimistic global accuracy too. This is definitely not what we want when we do LDA, particularly when we used trained models to then make predictions, for example in the archaeological context.
+
+We realized both i) and ii) empirically and yet we are confident that these can probably be explained mathematically we never find out how and why.
+
+Along the last ~10 years (2014->2024), we thus systematically investigated the number of components (or harmonics) to retain and used permutations to obtain balanced datasets.
+
+As a side effect, the use of permutationnal approaches typically allows to obtain the true distribution of $H_0$, in other words to compare model performances against pure random. For morphometrical studies, this allowed to detect subtle yet significant morphological signals even with relatively low accuracies. In other words, even a model with 60% accuracy (which is far from impressive) may be better than random (ie a binomial or a coin) and thus reveal a true morphological signal.
+
+# Architecture
+Programmatically, the last section boils down to: i) retain more or less variables, ii) do a lot of permutations. Consequently, this packages consists of very few and thin wrappers around (very) common statistical operations. We nevertheless hope it will set a common ground for morphometrics enthusiasts, help ourselves and newcomers in daily explorations and ease more sophisticated ones. 
+
+Here, all analyses will start with a `data.frame` with:
+1) the first column being the grouping structure that can be turned into a factor (eg a factor or character)
+2) at least one other column being a (or many more) quantitative variable.
+
+We first load the package using `library`:
+```{r}
 library(mevolCVP2)
-1*9 # just trying
 ```
+
+We will use the built-in `pig` dataset, borrowed from the _JAS_ paper. Let's have a look to the first and last 5 rows and the first 3 columns:
+```{r}
+pig[c(1:5, 166:171), 1:6]
+```
+
+head(pig)
+tail(pig)
+table(pig$sp)
+```
+
+

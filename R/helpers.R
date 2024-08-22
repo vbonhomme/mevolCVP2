@@ -77,7 +77,6 @@ lda1 <- function(x){
   table(actual, pred, dnn=c("actual", "predicted"))
 }
 
-
 # # confusion matrix helpers -----
 #' Confusion matrix metrics
 #'
@@ -108,7 +107,7 @@ acc_classes <- function(x){
 #' @rdname metrics
 #' @export
 acc_all <- function(x){
-  c(acc(x), acc_class(x))
+  c(acc(x), acc_classes(x))
 }
 
 # # cross-validation ----
