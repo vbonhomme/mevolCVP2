@@ -60,32 +60,57 @@ retain <- function(x, n=ncol(x)-1){
 }
 
 ## core functions -----
-# # a thin wrapper on MASS::lda that returns a (dimnamed) confusion matrix
+#' Linear discricriminant analysis
+#'
+#' A thin wrapper around `MASS::lda` that returns a (named) confusion matrix
+#'
+#' @param x data.frame
+#'
+#' @return confusion matrix (of class `table`)
+#'
+#' @examples
+#' pig %>% lda1()
+#' @export
 lda1 <- function(x){
   actual <- x[[1]]
   pred <- MASS::lda(x[, -1], actual, CV=TRUE)$class
   table(actual, pred, dnn=c("actual", "predicted"))
 }
-# pig %>% lda1
-#
-#
+
+
 # # confusion matrix helpers -----
+#' Confusion matrix metrics
+#'
+#' Only accuracy (global and by class) so far but more may come.
+#'
+#' @param x table typically a confusion matrix
+#'
+#' @return a named vector
+#'
+#' @rdname metrics
+#' @examples
+#' x <- iris %>% lda1
+#' x %>% acc()
+#' x %>% acc_class()
+#' x %>% acc_all()
+#
+#' @export
 acc <- function(x){
   c("acc"=sum(diag(x))/sum(x))
 }
-#
+
+#' @rdname metrics
+#' @export
 acc_classes <- function(x){
   diag(x)/rowSums(x)
 }
-#
+
+#' @rdname metrics
+#' @export
 acc_all <- function(x){
   c(acc(x), acc_class(x))
 }
-# x <- iris %>% lda1
-# x %>% acc()
-# x %>% acc_class()
-# x %>% acc_all()
-#
+
 # # cross-validation ----
 # #    - original: the dataset passed, untouched
 # #    - random:   original but shuffled on first (ie grouping) column
