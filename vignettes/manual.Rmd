@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 This tiny package (finally) releases the [seminal idea coined](https://www.sciencedirect.com/science/article/abs/pii/S030544031200355X) by Allowen Evin and colleagues in _Journal of Archaeological Science_ in 2013.
 
-This approach was previously available as a single script (circa 2013), then wrapped into a [package](https://github.com/vbonhomme/mevolCVP) (circa 2018) without any change to the code and not released on CRAN. Here, we rethink and rewrote the latter code to have something easier to build upon and to tweak.
+This approach was previously available as a single script (circa 2013), then wrapped into a [package](https://github.com/vbonhomme/mevolCVP) (circa 2018) without any change to the code and not released on CRAN. Here, we rethink and rewrote the latter code to have something easier to build upon.
 
 The Evin et al. (2013) paper, among others, used "predictive" discriminant analyses in morphometrical analyses, particularly in the context of landmark-based morphometrics which uses principal component analyses prior to LDA.
 
@@ -59,13 +59,17 @@ library(mevolCVP2)
 ```
 
 We will use the built-in `pig` dataset, borrowed from the _JAS_ paper. Let's have a look to the first and last 5 rows and the first 3 columns:
-```{r}
-pig[c(1:5, 166:171), 1:6]
+```{r pig-pres}
+x <- pig[c(1:5, 166:171), 1:6]
+x
 ```
 
-head(pig)
-tail(pig)
-table(pig$sp)
+Then three core helpers ease the common operations:
+
+```{r core-helpers}
+randomize(x)  # look at the first column
+balance(x, 2) # count rows in each group
+retain(x, 3)  # count quantitative variables columns
 ```
 
 
