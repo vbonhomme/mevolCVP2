@@ -61,26 +61,26 @@ retain <- function(x, n=ncol(x)-1){
 
 ## core functions -----
 # # a thin wrapper on MASS::lda that returns a (dimnamed) confusion matrix
-# lda1 <- function(x){
-#   actual <- x[[1]]
-#   pred <- MASS::lda(x[, -1], actual, CV=TRUE)$class
-#   table(actual, pred, dnn=c("actual", "predicted"))
-# }
-# iris %>% lda1
+lda1 <- function(x){
+  actual <- x[[1]]
+  pred <- MASS::lda(x[, -1], actual, CV=TRUE)$class
+  table(actual, pred, dnn=c("actual", "predicted"))
+}
+# pig %>% lda1
 #
 #
 # # confusion matrix helpers -----
-# acc <- function(x){
-#   (sum(diag(x))/sum(x)) %>% `names<-`("acc")
-# }
+acc <- function(x){
+  c("acc"=sum(diag(x))/sum(x))
+}
 #
-# acc_class <- function(x){
-#   diag(x)/rowSums(x)
-# }
+acc_classes <- function(x){
+  diag(x)/rowSums(x)
+}
 #
-# acc_all <- function(x){
-#   c(acc(x), acc_class(x))
-# }
+acc_all <- function(x){
+  c(acc(x), acc_class(x))
+}
 # x <- iris %>% lda1
 # x %>% acc()
 # x %>% acc_class()
