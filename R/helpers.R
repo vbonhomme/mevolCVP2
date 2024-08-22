@@ -1,5 +1,4 @@
 
-# permuting helpers  -----
 #' Balance a data.frame
 #'
 #' Balance with `n` individuals in each group, taken from the first column
@@ -21,19 +20,46 @@ balance <- function(x, n=min(table(x[[1]]))) {
   ids <- unlist(lapply(split(seq_along(x[[1]]), x[[1]]), sample, n, replace=TRUE))
   x[ids, ]
 }
-#
-# # this one randomize labels in first column
-# randomize <- function(x){
-#   x[[1]] <- sample(x[[1]])
-#   x
-# }
-#
-# # this one retain n columns (all by default)
-# retain <- function(x, n=ncol(x)-1){
-#   x[, 1:(n+1)]
-# }
-#
-# # core functions -----
+
+#' Randomize a data.frame
+#'
+#' Randomize a data.frame by shuffling the first column
+#'
+#' @param x data.frame with first column as grouping column
+#'
+#' @return shuffled data.frame
+#'
+#' @examples
+#' # untouched dataset
+#' head(pig$sp, 10)
+#' # balance helps
+#' head(randomize(pig)$sp, 10)
+#' @export
+randomize <- function(x){
+  x[[1]] <- sample(x[[1]])
+  x
+}
+
+#' Retain some variables from a data.frame
+#'
+#' Retain only the `n` columns, the first let apart.
+#'
+#' @param x data.frame with first column as grouping column
+#' @param n integer number of columns to retain. All by default.
+#'
+#' @return data.frame
+#'
+#' @examples
+#' # untouched dataset with all its columns
+#' ncol(pig)
+#' # after retaining only 12 (plus the 1st as the grouping)
+#' ncol(retain(pig, 12))
+#' @export
+retain <- function(x, n=ncol(x)-1){
+  x[, 1:(n+1)]
+}
+
+## core functions -----
 # # a thin wrapper on MASS::lda that returns a (dimnamed) confusion matrix
 # lda1 <- function(x){
 #   actual <- x[[1]]
