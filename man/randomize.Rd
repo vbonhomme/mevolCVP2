@@ -18,6 +18,6 @@ Randomize a data.frame by shuffling the first column
 \examples{
 # untouched dataset
 head(pig$sp, 10)
-# balance helps
+# now randomized
 head(randomize(pig)$sp, 10)
 }

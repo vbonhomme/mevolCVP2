@@ -1,10 +1,12 @@
+# core helpers -------
 
 #' Balance a data.frame
 #'
 #' Balance with `n` individuals in each group, taken from the first column
 #'
 #' @param x data.frame with first column as grouping column
-#' @param n integer number of individuals in each group. Smallest sample size by default.
+#' @param n_ind integer number of individuals in each group. Smallest sample size by default.
+#' @param replace logical whether so sample with replacement (or not). `TRUE` by default.
 #'
 #' @details Note that [sample]() is done with `replace=TRUE`
 #'
@@ -16,8 +18,8 @@
 #' # balance helps
 #' table(balance(pig)$sp)
 #' @export
-balance <- function(x, n=min(table(x[[1]]))) {
-  ids <- unlist(lapply(split(seq_along(x[[1]]), x[[1]]), sample, n, replace=TRUE))
+balance <- function(x, n_ind=min(table(x[[1]])), replace=TRUE) {
+  ids <- unlist(lapply(split(seq_along(x[[1]]), x[[1]]), sample, n_ind, replace=replace))
   x[ids, ]
 }
 
@@ -32,7 +34,7 @@ balance <- function(x, n=min(table(x[[1]]))) {
 #' @examples
 #' # untouched dataset
 #' head(pig$sp, 10)
-#' # balance helps
+#' # now randomized
 #' head(randomize(pig)$sp, 10)
 #' @export
 randomize <- function(x){
@@ -45,7 +47,7 @@ randomize <- function(x){
 #' Retain only the `n` columns, the first let apart.
 #'
 #' @param x data.frame with first column as grouping column
-#' @param n integer number of columns to retain. All by default.
+#' @param n_col integer number of columns to retain. All by default.
 #'
 #' @return data.frame
 #'
@@ -55,11 +57,39 @@ randomize <- function(x){
 #' # after retaining only 12 (plus the 1st as the grouping)
 #' ncol(retain(pig, 12))
 #' @export
-retain <- function(x, n=ncol(x)-1){
-  x[, 1:(n+1)]
+retain <- function(x, n_col=ncol(x)-1){
+  x[, 1:(n_col+1)]
 }
 
-## core functions -----
+#' Obtain different flavours of a dataset
+#'
+#' This returns a list with four variations of a data.set:
+#'
+#' * original: the dataset passed, untouched
+#' * random:   original but shuffled on first (ie grouping) column
+#' * balanced: original but balanced on first column
+#' * balanced_random: balanced but randomized on first column
+#'
+#' @param x data.frame
+#' @param n_ind passed to [balance()] (the smallest sample size by default)
+#'
+#' @return a named list described above
+#'
+#' @examples
+#' pig %>% partition()
+
+#' @export
+partition <- function(x, n_ind=min(table(x[[1]]))){
+  list(original=x,
+       random=x %>% randomize(),
+       balanced=x %>% balance(n_ind),
+       balanced_random=x %>% balance(n_ind) %>% randomize()
+  )
+}
+
+.partition_names <- c("original", "random", "balanced", "balanced_random")
+
+# core functions -----
 #' Linear discricriminant analysis
 #'
 #' A thin wrapper around `MASS::lda` that returns a (named) confusion matrix
@@ -109,36 +139,6 @@ acc_classes <- function(x){
 acc_all <- function(x){
   c(acc(x), acc_classes(x))
 }
-
-# # cross-validation ----
-
-#' Obtain different flavours of a dataset
-#'
-#' This returns a list with four variations of a data.set:
-#'
-#' * original: the dataset passed, untouched
-#' * random:   original but shuffled on first (ie grouping) column
-#' * balanced: original but balanced on first column
-#' * balanced_random: balanced but randomized on first column
-#'
-#' @param x data.frame
-#' @param n passed to [balance()] (the smallest sample size by default)
-#'
-#' @return a named list described above
-#'
-#' @examples
-#' pig %>% partition()
-
-#' @export
-partition <- function(x, n=min(table(x[[1]]))){
-  list(original=x,
-       random=x %>% randomize(),
-       balanced=x %>% balance(n),
-       balanced_random=x %>% balance(n) %>% randomize()
-  )
-}
-
-.partition_names <- c("original", "random", "balanced", "balanced_random")
 
 #
 # # hooks ----
@@ -248,12 +248,4 @@ partition <- function(x, n=min(table(x[[1]]))){
 # expand_grid(iter=1:5, retain=1:10, partition=partition_names)
 #
 #
-#
-#
-#
-#
-#
-#
-#
-#
-#
+

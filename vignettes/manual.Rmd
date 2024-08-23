@@ -1,34 +1,40 @@
 ---
-title: "How to use (and build on) mevolCVP2"
+title: "How to use and build on mevolCVP2"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{manual}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
+  
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+collapse = TRUE,
+comment = "#>"
 )
 ```
 
-# Preamble
+## Foreword
+### History
 
-This tiny package (finally) releases the [seminal idea coined](https://www.sciencedirect.com/science/article/abs/pii/S030544031200355X) by Allowen Evin and colleagues in _Journal of Archaeological Science_ in 2013.
+This tiny package (finally) makes available the [idea coined](https://www.sciencedirect.com/science/article/abs/pii/S030544031200355X) by Allowen Evin and colleagues in _Journal of Archaeological Science_ in 2013.
 
-This approach was previously available as a single script (circa 2013), then wrapped into a [package](https://github.com/vbonhomme/mevolCVP) (circa 2018) without any change to the code and not released on CRAN. Here, we rethink and rewrote the latter code to have something easier to build upon.
+This approach was previously available as a single script (circa 2013), then wrapped into a [package](https://github.com/vbonhomme/mevolCVP) (circa 2018) without any change to the code and not released on CRAN. 
 
+Here, we rethink and rewrote the latter code to have something easier to build upon.
+
+### The idea
 The Evin et al. (2013) paper, among others, used "predictive" discriminant analyses in morphometrical analyses, particularly in the context of landmark-based morphometrics which uses principal component analyses prior to LDA.
 
-The idea was two-fold: i) parameterized the optimal number of principal components to retain for further linear discriminant analyses, and ii) evaluated the effects of unbalanced sample sized between groups for LDA.
+The idea was two-fold: i) parameterize the optimal number of principal components to retain for further linear discriminant analyses, and ii) evaluate the effects of unbalanced sample sized between groups for further LDA.
 
-Yet this approach deeply changed the way we see, parameterize and do LDAs in morphometrics, it actualy boils down, statistically, to the following two core ideas.
+Yet this approach deeply changed the way we see, parameterize and do LDAs unsing morphometrics data, it actually boils down, statistically, to the following two core ideas and to the very few and thin functions included in that package.
 
-# Rationale
+We present the rationale behind this package, then how it works in practice, and finally how to extend it to your own needs.
 
-The rational of permutationnal and parameterized discriminant analyses boils down to two ideas:
+### The rationale
+
+The rational of permutationnal and parameterized discriminant analyses boils down to: **both the number of variables and the balance between groups size matter for linear discriminant analyses.**
 
 1) **The number of variables is discriminant analyses matters** and can be optimized.
 
@@ -46,33 +52,77 @@ Along the last ~10 years (2014->2024), we thus systematically investigated the n
 
 As a side effect, the use of permutationnal approaches typically allows to obtain the true distribution of $H_0$, in other words to compare model performances against pure random. For morphometrical studies, this allowed to detect subtle yet significant morphological signals even with relatively low accuracies. In other words, even a model with 60% accuracy (which is far from impressive) may be better than random (ie a binomial or a coin) and thus reveal a true morphological signal.
 
-# Architecture
-Programmatically, the last section boils down to: i) retain more or less variables, ii) do a lot of permutations. Consequently, this packages consists of very few and thin wrappers around (very) common statistical operations. We nevertheless hope it will set a common ground for morphometrics enthusiasts, help ourselves and newcomers in daily explorations and ease more sophisticated ones. 
 
-Here, all analyses will start with a `data.frame` with:
-1) the first column being the grouping structure that can be turned into a factor (eg a factor or character)
-2) at least one other column being a (or many more) quantitative variable.
+## mevolCVP2 in practice
 
-We first load the package using `library`. We also specify a random seed which is a good idea to have the best of both worlds: randomness _and_ replicability across your sessions.
-```{r}
+### Dependencies
+
+First thing first, you can install the package with:
+
+```{r install, eval=FALSE}
+# install.packages("pak")
+pak::pak("vbonhomme/mevolCVP2")
+```
+
+Once it will be released on CRAN, this will install the last release from CRAN:
+
+```{r install2, eval=FALSE}
+install.packages("mevolCVP2")
+```
+
+We first load the package using `library`. We also specify a [random seed](https://en.wikipedia.org/wiki/Random_seed) which is a good idea to have the best of both worlds: randomness _and_ replicability across your sessions.
+
+```{r library, message=FALSE}
 library(mevolCVP2)
 set.seed(2329)
 ```
 
-We will use the built-in `pig` dataset, borrowed from the _JAS_ paper. Let's have a look to the first and last 5 rows and the first 3 columns:
+We will also use a couple of packages from the [tidyverse](https://www.tidyverse.org/) so we load them now:
+
+```{r library2,  message=FALSE}
+library(dplyr)
+library(purrr)
+library(tidyr)
+library(ggplot2)
+```
+
+### Data presentation
+Here, all analyses will start with a `data.frame` with:
+
+1) the first column being the grouping structure that can be turned into a factor (eg a factor or character)
+2) at least one other column being a (or many more) quantitative variable.
+
+Such a dataset is available within the package, named `pig` (see `?pig`) and borrowed from the _JAS_ paper. Let's have a look to the first and last 3 rows and the first 3 variables columns:
 ```{r pig-pres}
-minipig <- pig[c(1:5, 166:171), 1:6]
+minipig <- pig[c(1:3, 168:171), 1:4]
 minipig
 ```
 
-Then three core helpers ease the common operations:
+### Helpers
+
+Below we present helpers and recipes that can easily be reused to you own analyses. 
+
+#### Randomizing and selecting columns
+Three core helpers will ease the common operations.
+
+* `randomize` shuffles the first column, ie randomize grouping labels;
+* `balance` resample rows using the grouping labels, so that there are `n` individuals in each group. `n_ind` is, by default, the smallest group size. Also, sampling is done with `replace=TRUE` by default
+* `retain` will select only `n_col` from variables columns (all by default).
 
 ```{r core-helpers}
 randomize(minipig)  # look at the first column
-balance(minipig, 2) # count rows in each group
-retain(minipig, 3)  # count quantitative variables columns
+balance(minipig, n_ind=2) # count rows in each group
+retain(minipig, n_col=2)  # count quantitative variables columns
 ```
 
+To ease permutations, they are wrapped in `partition()` that returns a list with four different datasets with self-explanatory names:
+
+```{r partition}
+pigs1 <- partition(minipig, n_ind=3)
+pigs1
+```
+
+#### LDA calculation and digestion
 The workhorse of this package is a thin wrapper on top of `MASS::lda` that directly returns the confusion matrix. `MASS::lda` is passed with `CV=TRUE` which returns leave-one-out cross-validated predictions, digested into a confusion matrix. Let's try it on the full `pig` dataset:
 
 ```{r lda1}
@@ -89,60 +139,95 @@ acc_all(cm)
 
 `pig` is "highly" unbalanced in terms of sample sizes between the two groups. We expect a naive LDA on this dataset to be biased and an LDA on balanced dataset to be more realistic in terms of class accuracies.
 
-```{r}
+```{r accs}
 pig %>% lda1() %>% acc_classes()
 pig %>% balance() %>% lda1() %>% acc_classes()
 ```
 
-Above, we realize that the class accuracy of the `WB` group (larger by more than a factor 3) is drastically reduced and actually performs less well than `DP`.
+Above, we observe that the class accuracy of the `WB` group (larger by more than a factor 3) is drastically reduced and actually performs less well than `DP`.
 
-Whether these values are better than pure random have to be properly tested. We expect, in such binary case, something around 50/50 for pure random (ie a binomial) but we can be away from this ideal case that hypothesize a gentle structure of variables used by the LDA (which is not the case).
+Whether these values are better than pure random have to be properly tested. We expect, in such binary case, something around 50/50 for pure random (ie a binomial) but we can be away from this ideal case.
 
-```{r}
+```{r acc_classes}
 pig %>% balance() %>% randomize() %>% lda1() %>% acc_classes()
 ```
 
 We already have pretty much everything we need!
 
-One more helpful helper is `partition` that eases what we have done just before and returns a list with four different datasets with self-explanatory names:
+### In action: balancing and permutating
+
+#### A single round
+Now, we gonna go take profit of functionnal programming tools provided by [purrr](https://purrr.tidyverse.org/). If you are not familiar with this package, stop everything and go have a look to it.
+
+```{r map1}
+pig %>% partition() %>% map(\(.df1) .df1 %>% lda1() %>% acc_all())
+```
+The results above should reflect the expectations and results we observed before, doing it "by hand", line after line.
+
+Let's wrap this into a function that would accept any dataset. We also arrange a bit what comes out of the `map` into a nice and named tibble.
 
 ```{r}
-pigs1 <- partition(pig)
-pigs1
+perm1 <- function(x) {
+  x %>% 
+    partition() %>% 
+    map(\(.x) .x %>% lda1() %>% acc_all()) %>% 
+    do.call("rbind", .) %>% as_tibble(rownames = "partition")
+}
+pig %>% perm1()
 ```
 
-Now, we gonna take profit of functionnal programming tools provided by [purrr](https://purrr.tidyverse.org/). If you are not familiar with this package, stop everything and go have a look to it.
+Can you see where we're going here? So let fun begins and we let's replicate these permutations.
 
-```{r}
-library(purrr)
-pigs1 %>% map(\(.df1) .df1 %>% lda1() %>% acc_all())
-```
+#### More than a single round
+Here we go for 10 rounds for the sake of speed while writing and compiling the package but feel free to change it by your side.
 
-The results above should replicate the expectations and results we observed before, doing it "by hand". 
+We will come back to the full `pig` and use a `map` variant, the `_dfr` version, that directly rbinds the intermediate list into a tibble. Feel free try the raw `map` below.
 
-We can arrange them a bit and put them in a nice tibble. We just add a couple more tidying functions to the call:
+**Everything that follows will adhere to this idea: combine the few helpers, do permutations using `map` and friends, summarize and graph.**
 
-```{r}
-library(dplyr)
-pigs1 %>% map(\(.df1) .df1 %>% lda1() %>% acc_all()) %>% 
-  do.call("rbind", .) %>% as_tibble(rownames = "partition")
-```
-Can you see where we're going here? So let fun begins and we will replicate the four LDAs done just before using one more layer of `map_dfr` which is just a `map` that returns its results into a "rbinded" `data.frame`. Let's try with 10 iterations.
-
-
-```{r}
+```{r map10, message=FALSE, warning=FALSE}
 K=10
-do1 <- function() {pigs1 %>% map(\(.df1) .df1 %>% lda1() %>% acc_all()) %>% 
-  do.call("rbind", .) %>% as_tibble(rownames = "partition")}
-pigs10 <- map_dfr(1:10, \(i) do1())
-pigs10
+pig10 <- map_dfr(seq_len(K), \(iter) pig %>% perm1())
+head(pig10)
 ```
 
-Let's digest this a bit with `dplyr`
-```{r}
-pigs10 %>% 
+Let's summarise this a bit with `dplyr` so that we can summatise the mean and the SD:
+```{r summarise}
+pig10 %>% 
   group_by(partition) %>% 
-  summarize(across(everything(), median))
-
+  summarize(across(everything(), c("median"=median, "sd"=sd)))
 ```
+#### Summary and graph
+Alternatively, to get a more compact table:
+
+```{r}
+mean_sd <- function(x) paste0(round(mean(x), 3), "±", round(sd(x), 3))
+pig10 %>% 
+  group_by(partition) %>% 
+  summarize(across(everything(), mean_sd))
+```
+We can also have a nice graph after a little pivoting step to please `ggplot2`:
+```{r}
+pig10 %>% 
+  mutate(partition=factor(partition, 
+                      levels=c("original", "random", "balanced_random", "balanced"), ordered=TRUE)) %>% # order partition for graphics purposes
+  pivot_longer(acc:last_col(), names_to = "what") %>% # pivot the tibble to a longer form
+  ggplot() + 
+  aes(x=partition, y=value, fill=what) + 
+  geom_boxplot() +
+  theme_minimal()
+```
+
+The _original_  results is the one you would obtain without touching your original dataset: global accuracy is overestimated as weel as WB class. When you look at _balanced_ this is corrected. This model performs clearly better than _balanced_random_ which is pure random. Sounds like there is a strong morphological signal in there!
+
+### In action: adding variable selection
+
+
+
+
+
+## Graphics
+
+## Recipes
+
 

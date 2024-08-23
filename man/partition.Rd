@@ -4,12 +4,12 @@
 \alias{partition}
 \title{Obtain different flavours of a dataset}
 \usage{
-partition(x, n = min(table(x[[1]])))
+partition(x, n_ind = min(table(x[[1]])))
 }
 \arguments{
 \item{x}{data.frame}
 
-\item{n}{passed to [balance()] (the smallest sample size by default)}
+\item{n_ind}{passed to [balance()] (the smallest sample size by default)}
 }
 \value{
 a named list described above

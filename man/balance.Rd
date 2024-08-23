@@ -4,12 +4,14 @@
 \alias{balance}
 \title{Balance a data.frame}
 \usage{
-balance(x, n = min(table(x[[1]])))
+balance(x, n_ind = min(table(x[[1]])), replace = TRUE)
 }
 \arguments{
 \item{x}{data.frame with first column as grouping column}
 
-\item{n}{integer number of individuals in each group. Smallest sample size by default.}
+\item{n_ind}{integer number of individuals in each group. Smallest sample size by default.}
+
+\item{replace}{logical whether so sample with replacement (or not). `TRUE` by default.}
 }
 \value{
 balanced data.frame

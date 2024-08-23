@@ -4,12 +4,12 @@
 \alias{retain}
 \title{Retain some variables from a data.frame}
 \usage{
-retain(x, n = ncol(x) - 1)
+retain(x, n_col = ncol(x) - 1)
 }
 \arguments{
 \item{x}{data.frame with first column as grouping column}
 
-\item{n}{integer number of columns to retain. All by default.}
+\item{n_col}{integer number of columns to retain. All by default.}
 }
 \value{
 data.frame
