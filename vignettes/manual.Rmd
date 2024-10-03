@@ -2,72 +2,72 @@
 title: "How to use and build on mevolCVP2"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{manual}
+%\VignetteIndexEntry{manual}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
----
+  ---
   
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-collapse = TRUE,
-comment = "#>"
-)
-```
-
-## Foreword
-### History
-
-This tiny package (finally) makes available the [idea coined](https://www.sciencedirect.com/science/article/abs/pii/S030544031200355X) by Allowen Evin and colleagues in _Journal of Archaeological Science_ in 2013.
-
-This approach was previously available as a single script (circa 2013), then wrapped into a [package](https://github.com/vbonhomme/mevolCVP) (circa 2018) without any change to the code and not released on CRAN. 
-
-Here, we rethink and rewrote the latter code to have something easier to build upon.
-
-### The idea
-The Evin et al. (2013) paper, among others, used "predictive" discriminant analyses in morphometrical analyses, particularly in the context of landmark-based morphometrics which uses principal component analyses prior to LDA.
-
-The idea was two-fold: i) parameterize the optimal number of principal components to retain for further linear discriminant analyses, and ii) evaluate the effects of unbalanced sample sized between groups for further LDA.
-
-Yet this approach deeply changed the way we see, parameterize and do LDAs unsing morphometrics data, it actually boils down, statistically, to the following two core ideas and to the very few and thin functions included in that package.
-
-We present the rationale behind this package, then how it works in practice, and finally how to extend it to your own needs.
-
-### The rationale
-
-The rational of permutationnal and parameterized discriminant analyses boils down to: **both the number of variables and the balance between groups size matter for linear discriminant analyses.**
-
-1) **The number of variables is discriminant analyses matters** and can be optimized.
-
-This is typically the case for landmark approaches where a "preliminary" PCA mandatory and its components later used for LDA. But even for outline-based approaches, where quantitative variables are not orthogonal and independant by construction, their number also matters.
-
-In other words, the common view that a linear discriminant analysis accuracy increases monotonously with the number of variables you feed it with is wrong. 
-
-Of course, we let apart here many other fundamental aspects such as measurement error, it is neither reasonable nor meaningful (nor even allowed) to use 200 principal components or 60 harmonics to train models that will ultimately be used on degraded archaeological material (or even fresh)
-
-2) **The group sample sizes matters**. In spite of prior used by default in LDA (eg in `MASS::lda`), the class proportions is not enough to unbias class predictions and consequently global accuracy. In other words, if you have a dataset with 90% of class A and 10% of class B, you will "mechanically" have a better cross-validation accuracy for class A and likely an optimistic global accuracy too. This is definitely not what we want when we do LDA, particularly when we used trained models to then make predictions, for example in the archaeological context.
-
-We realized both i) and ii) empirically and yet we are confident that these can probably be explained mathematically we never find out how and why.
-
-Along the last ~10 years (2014->2024), we thus systematically investigated the number of components (or harmonics) to retain and used permutations to obtain balanced datasets.
-
-As a side effect, the use of permutationnal approaches typically allows to obtain the true distribution of $H_0$, in other words to compare model performances against pure random. For morphometrical studies, this allowed to detect subtle yet significant morphological signals even with relatively low accuracies. In other words, even a model with 60% accuracy (which is far from impressive) may be better than random (ie a binomial or a coin) and thus reveal a true morphological signal.
-
-
-## mevolCVP2 in practice
-
-### Dependencies
-
-First thing first, you can install the package with:
-
-```{r install, eval=FALSE}
-# install.packages("pak")
-pak::pak("vbonhomme/mevolCVP2")
-```
-
-Once it will be released on CRAN, this will install the last release from CRAN:
-
+  ```{r, include = FALSE}
+  knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+  )
+  ```
+  
+  ## Foreword
+  ### History
+  
+  This tiny package (finally) makes available the [idea coined](https://www.sciencedirect.com/science/article/abs/pii/S030544031200355X) by Allowen Evin and colleagues in _Journal of Archaeological Science_ in 2013.
+  
+  This approach was previously available as a single script (circa 2013), then wrapped into a [package](https://github.com/vbonhomme/mevolCVP) (circa 2018) without any change to the code and not released on CRAN. 
+  
+  Here, we rethink and rewrote the latter code to have something easier to build upon.
+  
+  ### The idea
+  The Evin et al. (2013) paper, among others, used "predictive" discriminant analyses in morphometrical analyses, particularly in the context of landmark-based morphometrics which uses principal component analyses prior to LDA.
+  
+  The idea was two-fold: i) parameterize the optimal number of principal components to retain for further linear discriminant analyses, and ii) evaluate the effects of unbalanced sample sized between groups for further LDA.
+  
+  Yet this approach deeply changed the way we see, parameterize and do LDAs unsing morphometrics data, it actually boils down, statistically, to the following two core ideas and to the very few and thin functions included in that package.
+  
+  We present the rationale behind this package, then how it works in practice, and finally how to extend it to your own needs.
+  
+  ### The rationale
+  
+  The rational of permutationnal and parameterized discriminant analyses boils down to: **both the number of variables and the balance between groups size matter for linear discriminant analyses.**
+  
+  1) **The number of variables is discriminant analyses matters** and can be optimized.
+  
+  This is typically the case for landmark approaches where a "preliminary" PCA mandatory and its components later used for LDA. But even for outline-based approaches, where quantitative variables are not orthogonal and independant by construction, their number also matters.
+  
+  In other words, the common view that a linear discriminant analysis accuracy increases monotonously with the number of variables you feed it with is wrong. 
+  
+  Of course, we let apart here many other fundamental aspects such as measurement error, it is neither reasonable nor meaningful (nor even allowed) to use 200 principal components or 60 harmonics to train models that will ultimately be used on degraded archaeological material (or even fresh)
+  
+  2) **The group sample sizes matters**. In spite of prior used by default in LDA (eg in `MASS::lda`), the class proportions is not enough to unbias class predictions and consequently global accuracy. In other words, if you have a dataset with 90% of class A and 10% of class B, you will "mechanically" have a better cross-validation accuracy for class A and likely an optimistic global accuracy too. This is definitely not what we want when we do LDA, particularly when we used trained models to then make predictions, for example in the archaeological context.
+  
+  We realized both i) and ii) empirically and yet we are confident that these can probably be explained mathematically we never find out how and why.
+  
+  Along the last ~10 years (2014->2024), we thus systematically investigated the number of components (or harmonics) to retain and used permutations to obtain balanced datasets.
+  
+  As a side effect, the use of permutationnal approaches typically allows to obtain the true distribution of $H_0$, in other words to compare model performances against pure random. For morphometrical studies, this allowed to detect subtle yet significant morphological signals even with relatively low accuracies. In other words, even a model with 60% accuracy (which is far from impressive) may be better than random (ie a binomial or a coin) and thus reveal a true morphological signal.
+  
+  
+  ## mevolCVP2 in practice
+  
+  ### Dependencies
+  
+  First thing first, you can install the package with:
+  
+  ```{r install, eval=FALSE}
+  # install.packages("pak")
+  pak::pak("vbonhomme/mevolCVP2")
+  ```
+  
+  Once it will be released on CRAN, this will install the last release from CRAN:
+  
 ```{r install2, eval=FALSE}
-install.packages("mevolCVP2")
+  install.packages("mevolCVP2")
 ```
 
 We first load the package using `library`. We also specify a [random seed](https://en.wikipedia.org/wiki/Random_seed) which is a good idea to have the best of both worlds: randomness _and_ replicability across your sessions.
@@ -200,17 +200,17 @@ pig10 %>%
 #### Summary and graph
 Alternatively, to get a more compact table:
 
-```{r}
+```{r summarise2}
 mean_sd <- function(x) paste0(round(mean(x), 3), "±", round(sd(x), 3))
 pig10 %>% 
   group_by(partition) %>% 
   summarize(across(everything(), mean_sd))
 ```
 We can also have a nice graph after a little pivoting step to please `ggplot2`:
-```{r}
+```{r gg1}
 pig10 %>% 
   mutate(partition=factor(partition, 
-                      levels=c("original", "random", "balanced_random", "balanced"), ordered=TRUE)) %>% # order partition for graphics purposes
+                          levels=c("original", "random", "balanced_random", "balanced"), ordered=TRUE)) %>% # order partition for graphics purposes
   pivot_longer(acc:last_col(), names_to = "what") %>% # pivot the tibble to a longer form
   ggplot() + 
   aes(x=partition, y=value, fill=what) + 
@@ -221,6 +221,57 @@ pig10 %>%
 The _original_  results is the one you would obtain without touching your original dataset: global accuracy is overestimated as weel as WB class. When you look at _balanced_ this is corrected. This model performs clearly better than _balanced_random_ which is pure random. Sounds like there is a strong morphological signal in there!
 
 ### In action: adding variable selection
+
+Let's sophisticate a bit the `perm1` function to allow for selecting more or less variables to feed the LDA with. We simply add a `n_col` argument that we pass to `retain()`, coined before `partition()`:
+
+```{r perm2}
+perm2 <- function(x, n_col) {
+  x %>% 
+    retain(n_col) %>% 
+    partition() %>% 
+    map(\(.x) .x %>% lda1() %>% acc_all()) %>% 
+    do.call("rbind", .) %>% as_tibble(rownames = "partition")
+}
+```
+
+We expect that 20 components would perform better than a single one. Let's check it on a single round, and indeed:
+```{r}
+pig %>% perm2(1)
+pig %>% perm2(20)
+```
+We can easily write this into a map. We also record the number of variables and make it return directly a single, rbinded data.frame with `map_dfr`:
+
+```{r}
+z <- map_dfr(1:20, \(n_col) pig %>% perm2(n_col) %>% mutate(retain=n_col, .before=1))
+head(z)
+```
+To replicate this calculation K times, we simply wrap it into an additional layer of `map`:
+
+```{r}
+K=10
+z <- map_dfr(seq_len(K),
+        \(iter) map_dfr(1:20, \(n_col) pig %>% perm2(n_col) %>% mutate(retain=n_col, .before=1)) %>% 
+          mutate(iter=iter, .before=1)
+)
+head(z)
+```
+
+Let's plot this beauty:
+
+```{r}
+z %>% 
+  pivot_longer(acc:last_col(), names_to="metric") %>% 
+  ggplot() + 
+  aes(x=retain, y=value, col=partition) +
+  geom_point(size=0.1) +
+  geom_smooth() +
+  facet_grid(~metric) +
+  xlab("number of PC retained") +
+  ylab("CV accuracy") +
+  theme_minimal()
+
+```
+
 
 
 
