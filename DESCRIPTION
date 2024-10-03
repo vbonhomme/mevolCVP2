@@ -23,6 +23,7 @@ Suggests:
 VignetteBuilder: knitr
 Imports: 
     dplyr,
+    ggplot2,
     magrittr,
     MASS,
     purrr,
